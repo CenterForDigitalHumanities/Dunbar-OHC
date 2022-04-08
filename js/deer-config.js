@@ -68,7 +68,7 @@ export default {
         },
         record: (obj,options={}) => {
             let tmpl = `
-            <h4>${obj.label}</h4>
+            <h3>${obj.label}</h3>
             <dl>
                 <dt>Collection</dt>
                 <dd>${getMetadata("Collection")}</dd>
