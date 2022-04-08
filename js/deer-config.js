@@ -93,7 +93,7 @@ export default {
             function getThumbnailElement() {
                 const src = obj.sequences[0].canvases[0].images[0].resource['@id']?.replace("full/full","full/,250")
                 if(src){
-                    return `<img alt="thumbnail" class="thumbnail" src="${src}" >`
+                    return `<a target="_blank" href="${obj.sequences[0].canvases[0].images[0].resource['@id']}"><img alt="thumbnail" class="thumbnail" src="${src}" ></a>`
                 }
             }
         }
