@@ -43,3 +43,32 @@ import { default as renderer, initializeDeerViews } from 'https://deer.rerum.io/
 import { default as record, initializeDeerForms } from 'https://deer.rerum.io/releases/alpha-0.11/deer-record.js'
 
 initializeDeerViews(DEER).then(() => initializeDeerForms(DEER))
+
+// auth
+let auth0 = null
+const fetchAuthConfig = () => fetch("/auth_config.json")
+const configureClient = async () => {
+    const response = await fetchAuthConfig()
+    const config = await response.json()
+  
+    auth0 = await createAuth0Client({
+      domain: config.domain,
+      client_id: config.clientId
+    })
+  }
+  window.onload = async () => {
+    await configureClient()
+    updateUI()
+  }
+  const updateUI = async () => {
+    const isAuthenticated = await auth0.isAuthenticated()
+  
+    if(!isAuthenticated) {
+        login()
+    }
+  }
+  const login = async () => {
+    await auth0.loginWithRedirect({
+      redirect_uri: window.location.origin
+    })
+  }
