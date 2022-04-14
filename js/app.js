@@ -61,6 +61,8 @@ const configureClient = async () => {
     updateUI()
   }
   const updateUI = async () => {
+    const user = await auth0.getUser()
+    console.log(user)
     const isAuthenticated = await auth0.isAuthenticated()
   
     if(!isAuthenticated) {
