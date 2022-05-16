@@ -1,21 +1,21 @@
 function globalFeedbackBlip(event, message, success) {
-    globalFeedback.innerText = message
-    globalFeedback.classList.add("show")
-    if (success) {
-        globalFeedback.classList.add("bg-success")
-    } else {
-        globalFeedback.classList.add("bg-error")
-    }
-    setTimeout(function () {
-        globalFeedback.classList.remove("show")
-        globalFeedback.classList.remove("bg-error")
-        // backup to page before the form
-        UTILS.broadcast(event, "globalFeedbackFinished", globalFeedback, { message: message })
-    }, 3000)
+  globalFeedback.innerText = message
+  globalFeedback.classList.add("show")
+  if (success) {
+    globalFeedback.classList.add("bg-success")
+  } else {
+    globalFeedback.classList.add("bg-error")
+  }
+  setTimeout(function () {
+    globalFeedback.classList.remove("show")
+    globalFeedback.classList.remove("bg-error")
+    // backup to page before the form
+    UTILS.broadcast(event, "globalFeedbackFinished", globalFeedback, { message: message })
+  }, 3000)
 }
 
 document.addEventListener('deer-updated', event => {
-    globalFeedbackBlip(event, `Saving ${event.detail.name ? "'"+event.detail.name + "' " : ""}successful!`, true)
+  globalFeedbackBlip(event, `Saving ${event.detail.name ? "'" + event.detail.name + "' " : ""}successful!`, true)
 })
 
 /**
@@ -48,29 +48,43 @@ initializeDeerViews(DEER).then(() => initializeDeerForms(DEER))
 let auth0 = null
 const fetchAuthConfig = () => fetch("/auth_config.json")
 const configureClient = async () => {
-    const response = await fetchAuthConfig()
-    const config = await response.json()
-  
-    auth0 = await createAuth0Client({
-      domain: config.domain,
-      client_id: config.clientId
-    })
-  }
-  window.onload = async () => {
-    await configureClient()
-    updateUI()
-  }
-  const updateUI = async () => {
-    const user = await auth0.getUser()
-    console.log(user)
-    const isAuthenticated = await auth0.isAuthenticated()
-  
-    if(!isAuthenticated) {
-        login()
+  const response = await fetchAuthConfig()
+  const config = await response.json()
+
+  auth0 = await createAuth0Client({
+    domain: config.domain,
+    client_id: config.clientId
+  })
+}
+window.onload = async () => {
+  await configureClient()
+  updateUI()
+}
+const updateUI = async () => {
+  const query = window.location.search;
+
+  if (query.includes("code=") && query.includes("state=")) {
+
+    try {
+      // Process the login state
+      const state = await auth0.handleRedirectCallback()
+      console.log(state)
+    } catch (err) {
+      console.warn("Existing session damaged. Please login again.")
+    }
+    finally {
+      // Use replaceState to redirect the user away and remove the querystring parameters
+      window.history.replaceState({}, document.title, "/")
     }
   }
-  const login = async () => {
-    await auth0.loginWithRedirect({
-      redirect_uri: window.location.origin
-    })
+  const isAuthenticated = await auth0.isAuthenticated()
+
+  if (!isAuthenticated) {
+    login()
   }
+}
+const login = async () => {
+  await auth0.loginWithRedirect({
+    redirect_uri: window.location.origin
+  })
+}
